@@ -45,16 +45,26 @@ class Plugin extends PluginBase
                 return true;
             }
 
+            if(App::runningInConsole()) {
+                return true;
+            }
+
             $user = BackendAuth::getUser();
 
-            if ($user && !$user->is_superuser) {
-
-                $template = File::get(__DIR__ . '/templates/closed.htm');
-
-                echo Twig::parse($template);
-
-                die();
+            if($user && $user->is_superuser) {
+                return true;
             }
+
+            // Allowing for login page
+            if(App::runningInBackend() && !$user) {
+                return true;
+            }
+
+            $template = File::get(__DIR__ . '/templates/closed.htm');
+
+            echo Twig::parse($template);
+
+            die();
         });
     }
 }
